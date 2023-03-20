@@ -4,7 +4,7 @@ This file is an implementation of Circular Buffer
 
 class Node:
     """
-    implements node for circular buffer
+    implements Node for circular buffer
     """
     def __init__(self, next, previous, value:str) -> None:
         self.value = value
@@ -16,13 +16,20 @@ class circularBuffer:
     implementation of circular buffer
     """
     def __init__(self, size):
+        """
+        init function creates empty circular buffer and necessary variable to work with it
+        :param size: describes size of circular buffer
+        :param start_node: defines start node for initialization
+        :param read_ptr: defines read pointer
+        :param wr_ptr: defines write pointer
+        :param read_flag: defines order in which i will read values and move pointer True - move->read; False - opposite
+        """
         self.size = size
 
         self.start_node = Node(None, None, None)
         self.wr_ptr = self.start_node
         self.read_ptr = self.start_node
         self.read_flag = False
-        self.elements_in_buffer = 0
 
         temp_last_node = self.start_node
         for i in range(size-1):
@@ -40,17 +47,25 @@ class circularBuffer:
 
 
     def read_from_buffer(self):
+        """
+        this function reads values from circular buffer
+        """
         if self.read_ptr != self.wr_ptr and self.read_flag == False:
             print(self.read_ptr.value)
             self.read_ptr = self.read_ptr.next
+
         elif self.read_ptr != self.wr_ptr and self.read_flag == True:
             self.read_ptr = self.read_ptr.next
             print(self.read_ptr.value)
+
         elif self.read_ptr == self.wr_ptr:
             print(self.read_ptr.value, "this was last value in buffer you can't read anymore")
             self.read_flag = True
 
     def write_to_buffer(self, value: str):
+        """
+        this function adds new Nodes to circular buffer
+        """
         new_Node = Node(None, None, value)
         if self.start_node.value == None:
             print(f"adding first  Node with value of: {value}")
