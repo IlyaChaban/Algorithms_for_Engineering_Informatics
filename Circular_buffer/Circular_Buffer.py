@@ -17,58 +17,89 @@ class circularBuffer:
     """
     def __init__(self, size):
         self.size = size
-        self.elements_in_buffer = 0
-        self.start_node = None
-        # Empty circular buffer initialization
-        for i in range(self.size):
-            next_node = Node(None, None, "")
-            if i == 0:
-                start_node = next_node
-                last_node = next_node
-            elif 0 < i <= self.size-1:
-                last_node.next = next_node
-                next_node.previous = last_node
-                last_node = next_node
-            elif i == self.size:
-                last_node.next = start_node
-                start_node.previous = last_node
 
-        self.start_node = start_node
-        self.read = start_node
-        self.write = start_node
+        self.start_node = Node(None, None, None)
+        self.wr_ptr = self.start_node
+        self.read_ptr = self.start_node
+        self.read_flag = False
+        self.elements_in_buffer = 0
+
+        temp_last_node = self.start_node
+        for i in range(size-1):
+            new_empty_node = Node(None, None, None)
+            if i != size-2:
+                temp_last_node.next = new_empty_node
+                new_empty_node.previous = temp_last_node
+                temp_last_node = new_empty_node
+            else:
+                new_empty_node.next = self.start_node
+                new_empty_node.previous = temp_last_node
+
+                temp_last_node.next = new_empty_node
+                self.start_node.previous = new_empty_node
+
 
     def read_from_buffer(self):
-        if self.read.next == self.write:
-            print("there is no more elements to read")
-        else:
-            print(self.read.value)
-            self.read = self.read.next
+        if self.read_ptr != self.wr_ptr and self.read_flag == False:
+            print(self.read_ptr.value)
+            self.read_ptr = self.read_ptr.next
+        elif self.read_ptr != self.wr_ptr and self.read_flag == True:
+            self.read_ptr = self.read_ptr.next
+            print(self.read_ptr.value)
+        elif self.read_ptr == self.wr_ptr:
+            print(self.read_ptr.value, "this was last value in buffer you can't read anymore")
+            self.read_flag = True
 
     def write_to_buffer(self, value: str):
-        if self.elements_in_buffer == 0:
-            self.write.value = value
-            self.write = self.write.next
-            self.elements_in_buffer = self.elements_in_buffer + 1
+        new_Node = Node(None, None, value)
+        if self.start_node.value == None:
+            print(f"adding first  Node with value of: {value}")
+            new_Node.next = self.start_node.next
+            new_Node.previous = self.start_node.previous
+            self.start_node.previous.next = new_Node
+            self.start_node.next.previous = new_Node
+            self.start_node = new_Node
+            self.wr_ptr = new_Node
+            self.read_ptr = new_Node
 
-        elif self.write.next == self.read:
-            print("you can't add more to the memory")
+        elif self.wr_ptr.next != self.read_ptr:
+            print(f"adding middle Node with value of: {value}")
+            new_Node.previous = self.wr_ptr
+            new_Node.next = self.wr_ptr.next.next
 
-        elif self.write.next != self.read:
-            self.write.value = value
-            self.elements_in_buffer = self.elements_in_buffer + 1
+            self.wr_ptr.next.next.previous = new_Node
+            self.wr_ptr.next = new_Node
+
+            self.wr_ptr = new_Node
+
+        elif self.wr_ptr.next == self.read_ptr:
+            print("Buffer is full")
+
 
 
 if __name__ == "__main__":
-    Buffer = circularBuffer(5)
-    start_node = Buffer.start_node
-    Buffer.write_to_buffer("1")
+    buff = circularBuffer(5)
+
+    temp_node = buff.start_node
+    for i in range(5):
+        print(temp_node.value)
+        temp_node = temp_node.next
+
+    for i in range(10):
+        buff.write_to_buffer(f"{i}")
 
     for _ in range(10):
-        Buffer.write_to_buffer("2")
+        buff.read_from_buffer()
 
-    for i in range(5):
-        print(start_node.value)
-        start_node = start_node.next
-
-
+    buff.write_to_buffer("5")
+    buff.write_to_buffer("6")
+    buff.read_from_buffer()
+    buff.write_to_buffer("7")
+    buff.read_from_buffer()
+    buff.write_to_buffer("8")
+    buff.read_from_buffer()
+    buff.read_from_buffer()
+    buff.read_from_buffer()
+    buff.write_to_buffer("9")
+    buff.read_from_buffer()
 
