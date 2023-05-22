@@ -1,8 +1,11 @@
-def dijkstra(graph, start):
+def dijkstra(graph, start, end):
     # Initialize the distance dictionary with all nodes except the start node set to infinity
     # and the start node set to 0
     distance = {node: float('inf') for node in graph}
     distance[start] = 0
+
+    # Create a dictionary to store the previous node in the shortest path
+    previous = {}
 
     # Create a set of unvisited nodes
     unvisited = set(graph)
@@ -20,15 +23,22 @@ def dijkstra(graph, start):
             tentative_distance = distance[current_node] + weight
 
             # If the tentative distance is less than the current distance to the neighbor,
-            # update the distance dictionary with the new value
+            # update the distance dictionary with the new value and set the previous node
             if tentative_distance < distance[neighbor]:
                 distance[neighbor] = tentative_distance
-                
-                # Add the neighbor back to the unvisited set
-                unvisited.add(neighbor)
+                previous[neighbor] = current_node
 
-    return distance
-    
+    # Build the shortest path from start to end
+    shortest_path = []
+    current_node = end
+    while current_node != start:
+        shortest_path.append(current_node)
+        current_node = previous[current_node]
+    shortest_path.append(start)
+    shortest_path.reverse()
+
+    # Return the shortest path and the points that need to be visited
+    return distance[end], shortest_path
     
 graph = {
     'A': {'B': 2, 'C': 4},
@@ -42,7 +52,9 @@ graph = {
 }
 
 start_node = 'A'
+end_node = 'H'
 
-distances = dijkstra(graph, start_node)
+distance, shortest_path = dijkstra(graph, start_node, end_node)
 
-print(distances)
+print("Shortest distance:", distance)
+print("Shortest path:", shortest_path)
